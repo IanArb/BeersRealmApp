@@ -2,7 +2,7 @@ import SwiftUI
 import shared
 
 struct BeersView: View {
-    @ObservedObject var viewModel = BeersViewModel(beersDAO: BeersDAO())
+    @ObservedObject var viewModel = BeersViewModel(beersDatabase: BeersDatabase())
     
     var body: some View {
         switch viewModel.state {
@@ -22,13 +22,22 @@ struct BeersView: View {
                     }
                 }
             }
+            .onDisappear {
+                viewModel.cancelRemoveHandler()
+            }
         case .empty:
             VStack(alignment: .center) {
                 Text("There are no beers here.. add some. I'm thirsty!")
             }
+            .onDisappear {
+                viewModel.cancelRemoveHandler()
+            }
         case .error:
             VStack(alignment: .center) {
                 Text("We've drank all the beer. Sorry!")
+            }
+            .onDisappear {
+                viewModel.cancelRemoveHandler()
             }
         }
     }
@@ -64,7 +73,7 @@ struct Card: View {
                 
                 HStack {
                     VStack(alignment: .leading) {
-                        ImageView(withURL: "https://firebasestorage.googleapis.com/v0/b/craftie-91fee.appspot.com/o/beers%2FElevation_pale_ale.png?alt=media&token=e5fbe476-dfeb-41ac-87d8-c2698099313c", contentMode: ContentMode.fit)
+                        ImageView(withURL: beer.imageUrl, contentMode: ContentMode.fit)
                             .frame(height: 120)
                     }
                     .padding(.top, 4)
@@ -90,7 +99,6 @@ struct Card: View {
             }
             .padding(.top, 30)
             .padding(.bottom, 30)
-            
 
         }
     }
