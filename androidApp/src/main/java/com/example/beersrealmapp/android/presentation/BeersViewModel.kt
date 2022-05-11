@@ -2,6 +2,7 @@ package com.example.beersrealmapp.android.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.beersrealmapp.BeerData
 import com.example.beersrealmapp.BeersDatabase
 import com.example.beersrealmapp.android.util.CoroutinesDispatcherProvider
@@ -36,15 +37,21 @@ class BeersViewModel @Inject constructor(
     }
 
     fun saveBeer(data: BeerData) {
-        beersDatabase.saveBeer(data)
+        viewModelScope.launch(dispatcher.io) {
+            beersDatabase.saveBeer(data)
+        }
     }
 
     fun removeBeerById(id: String) {
-        beersDatabase.removeBeerById(id)
+        viewModelScope.launch(dispatcher.io) {
+            beersDatabase.removeBeerById(id)
+        }
     }
 
     fun removeAllBeers() {
-        beersDatabase.removeAllBeers()
+        viewModelScope.launch(dispatcher.io) {
+            beersDatabase.removeAllBeers()
+        }
     }
 
 }

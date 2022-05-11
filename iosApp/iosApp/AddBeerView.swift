@@ -7,7 +7,7 @@ struct AddBeerView: View {
     @State private var abv: String = ""
     @State private var selection: Int? = nil
     
-    @ObservedObject var viewModel = BeersViewModel(beersDAO: BeersDAO())
+    @ObservedObject var viewModel = BeersViewModel(beersDatabase: BeersDatabase())
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -23,7 +23,7 @@ struct AddBeerView: View {
                         id: UUID().uuidString,
                         name: beerName,
                         brewery: brewery,
-                        imageUrl: "",
+                        imageUrl: "https://firebasestorage.googleapis.com/v0/b/craftie-91fee.appspot.com/o/beers%2FElevation_pale_ale.png?alt=media&token=e5fbe476-dfeb-41ac-87d8-c2698099313c",
                         abv: Int32(abv) ?? Int32(0)
                     )
                 )
@@ -52,6 +52,9 @@ struct AddBeerView: View {
         }
         .navigationBarTitle("Add beer", displayMode: .inline)
         .padding(16)
+        .onDisappear {
+            viewModel.cancelSaveHandler()
+        }
     }
 }
 

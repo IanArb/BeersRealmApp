@@ -4,13 +4,16 @@ import KMPNativeCoroutinesAsync
 
 class BeersViewModel : ObservableObject {
     
-    private let beersDatabase: BeersDarabase
+    private let beersDatabase: BeersDatabase
     
     init(beersDatabase: BeersDatabase) {
         self.beersDatabase = beersDatabase
     }
     
     private var handler: Task<(), Never>? = nil
+    private var saveHandler: Task<(), Never>? = nil
+    private var removeHandler: Task<(), Never>? = nil
+    private var removeAllHandler: Task<(), Never>? = nil
     
     enum State {
         case success([BeerData])
@@ -36,21 +39,46 @@ class BeersViewModel : ObservableObject {
                 self.state = .error
             }
         }
+        
     }
     
     func saveBeer(data: BeerData) {
-        beersDatabase.saveBeer(beer: data)
+        saveHandler = Task {
+            do {
+                _ = try await asyncFunction(for: beersDatabase.saveBeerNative(beer: data))
+            } catch {
+                self.state = .error
+            }
+        }
     }
     
     func removeBeerById(id: String) {
-        beersDatabase.removeBeerById(id: id)
+        removeHandler = Task {
+            do {
+                _ = try await asyncFunction(for: beersDatabase.removeBeerByIdNative(id: id))
+            } catch {
+                self.state = .error
+            }
+        }
     }
     
     func removeAllBeers() {
-        beersDatabase.removeAllBeers()
+        removeAllHandler = Task {
+            do {
+                _ = try await asyncFunction(for: beersDatabase.removeAllBeersNative())
+            } catch {
+                self.state = .error
+            }
+        }
     }
     
-    func cancel() {
-        handler?.cancel()
+    func cancelSaveHandler() {
+        saveHandler?.cancel()
     }
+    
+    func cancelRemoveHandler() {
+        removeHandler?.cancel()
+        removeAllHandler?.cancel()
+    }
+    
 }

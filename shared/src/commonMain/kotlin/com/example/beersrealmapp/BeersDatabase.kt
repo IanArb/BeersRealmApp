@@ -6,10 +6,8 @@ import io.realm.notifications.InitialResults
 import io.realm.notifications.ResultsChange
 import io.realm.notifications.UpdatedResults
 import io.realm.query
-import io.realm.query.find
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
 
 class BeersDatabase {
@@ -17,7 +15,7 @@ class BeersDatabase {
     private val configuration = RealmConfiguration.with(schema = setOf(BeerModel::class))
     private val realm = Realm.open(configuration)
 
-    fun saveBeer(beer: BeerData) {
+    suspend fun saveBeer(beer: BeerData) {
         val beerDb = BeerModel().apply {
             id = beer.id
             name = beer.name
@@ -25,7 +23,7 @@ class BeersDatabase {
             imageUrl = beer.imageUrl
             abv = beer.abv
         }
-        realm.writeBlocking {
+        realm.write {
             this.copyToRealm(beerDb)
         }
     }
@@ -33,7 +31,7 @@ class BeersDatabase {
     fun findAllBeers(): Flow<List<BeerData>> {
         return realm.query<BeerModel>().asFlow()
             .map {
-                when(it) {
+                when (it) {
                     is InitialResults -> {
                         transformToModel(it)
                     }
@@ -55,15 +53,16 @@ class BeersDatabase {
             )
         }
 
-    fun removeBeerById(id: String) {
-        realm.writeBlocking {
+
+    suspend fun removeBeerById(id: String) {
+        realm.write {
             val beer = query<BeerModel>("id = $0", id)
             delete(beer)
         }
     }
 
-    fun removeAllBeers() {
-        realm.writeBlocking {
+    suspend fun removeAllBeers() {
+        realm.write {
             val results = query<BeerModel>().find()
             delete(results)
         }
